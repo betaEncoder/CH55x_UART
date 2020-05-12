@@ -9,15 +9,22 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <ch554.h>
-#include <ch554_usb.h>
-#include <debug.h>
+#include "../ch554_sdcc/include/ch554.h"
+#include "../ch554_sdcc/include/debug.h"
 
 #include "uart.h"
 
 int main(){
+    CfgFsys();
 
-    while(1);
+    UART0_init();
+    UART0_write_string("Hello CH552T\r\n");
+
+
+    while(1){
+        UART0_write_byte(UART0_read_byte());    // echo back
+
+    }
 
     return 0;
 }
