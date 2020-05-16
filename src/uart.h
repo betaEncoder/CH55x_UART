@@ -16,6 +16,10 @@
 /* Set baudrate */
 #define UART0_BAUDRATE 115200   // It should be considered for the counter will not overflow.
 
+/* Uncomment if use interrupt API */
+#define UART0_ENABLE_INTERRUPT_DRIVEN_API
+#define UART0_BUFFER_LENGTH 16
+
 /* Select one of UART mode */
 //#define UART0_MODE0         // shiftregistor mode; baudrate is Fsys/12
 #define UART0_MODE1         // 8bit asyncronous mode; baudrate is provided Timer1 or Timer2
@@ -39,6 +43,10 @@
 //#define TIMER2_bT2_CLK 1        // T2 is driven fast clock. cf:bTMR_CLK
 //#define TIMER_bTMR_CLK 0        // fast clock frequency is Fsys/4.
 #define TIMER_bTMR_CLK 1        // fast clock frequency is Fsys.
+
+// return value
+#define UART_OK 0   // success
+#define UART_NG 1   // failed
 
 #ifdef UART0_USE_TIMER1
     #if TIMER_SMOD==1 && TIMER_bTMR_CLK==1 && TIMER1_bT1_CLK==1
@@ -87,3 +95,10 @@ inline void UART0_decrease_interrupt_priority();
 uint8_t UART0_read_byte();
 void UART0_write_byte(uint8_t byte);
 void UART0_write_string(char* string);
+#ifdef UART0_ENABLE_INTERRUPT_DRIVEN_API
+void _UART0_interrupt_handler();
+uint8_t UART0_get_bytes_to_read();
+uint8_t UART0_get_bytes_from_buffer(uint8_t* array, uint8_t length);
+uint8_t UART0_write_string_IT(char* string);
+uint8_t UART0_write_array_IT(uint8_t* array, uint8_t length);
+#endif

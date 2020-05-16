@@ -147,3 +147,160 @@ void UART0_write_string(char* string){
 
     return;
 }
+
+#ifdef UART0_ENABLE_INTERRUPT_DRIVEN_API
+// interrupt routine under processing
+volatile uint8_t tx_processing = 0;
+
+// indexes for ring buffer
+uint8_t tx_buffer_head_index = 0;
+uint8_t tx_buffer_data_count = 0;
+uint8_t rx_buffer_head_index = 0;
+uint8_t rx_buffer_data_count = 0;
+uint8_t UART0_TX_buffer[UART0_BUFFER_LENGTH];
+uint8_t UART0_RX_buffer[UART0_BUFFER_LENGTH];
+
+// ring buffer UART0_ENABLE_INTERRUPT_DRIVEN_API
+uint8_t UART0_put_byte_to_TX_buffer(uint8_t byte);
+uint8_t UART0_get_byte_from_TX_buffer(uint8_t* ptr);
+uint8_t UART0_put_byte_to_RX_buffer(uint8_t byte);
+uint8_t UART0_get_byte_from_RX_buffer(uint8_t* ptr);
+void _UART0_TX_done_interrupt_handler();
+void _UART0_RX_done_interrupt_handler();
+
+/* private functions */
+void _UART0_RX_done_interrupt_handler(){
+    UART0_put_byte_to_RX_buffer(SBUF);
+}
+
+void _UART0_TX_done_interrupt_handler(){
+    uint8_t byte;
+    if(UART0_get_byte_from_TX_buffer(&byte)==UART_OK){
+        // data to send is available
+        SBUF = byte;
+    }else{
+        // transmit done
+        tx_processing = 0;
+    }
+    return;
+}
+
+uint8_t UART0_put_byte_to_TX_buffer(uint8_t byte){
+    if(tx_buffer_data_count==UART0_BUFFER_LENGTH){
+        // buffer full
+        return UART_NG;
+    }
+    UART0_TX_buffer[tx_buffer_head_index] = byte;
+    tx_buffer_head_index++;
+    tx_buffer_head_index %= UART0_BUFFER_LENGTH;
+    tx_buffer_data_count++;
+
+    return UART_OK;
+}
+
+uint8_t UART0_get_byte_from_TX_buffer(uint8_t* ptr){
+    uint8_t index;
+    if(tx_buffer_data_count==0){
+        // buffer empty
+        return UART_NG;
+    }
+    index = tx_buffer_head_index-tx_buffer_data_count;
+    index %= UART0_BUFFER_LENGTH;
+    *ptr = UART0_TX_buffer[index];
+    tx_buffer_data_count--;
+
+    return UART_OK;
+}
+
+uint8_t UART0_put_byte_to_RX_buffer(uint8_t byte){
+    if(rx_buffer_data_count==UART0_BUFFER_LENGTH){
+        // buffer full
+        return UART_NG;
+    }
+    UART0_RX_buffer[rx_buffer_head_index] = byte;
+    rx_buffer_head_index++;
+    rx_buffer_head_index %= UART0_BUFFER_LENGTH;
+    rx_buffer_data_count++;
+
+    return UART_OK;
+}
+
+uint8_t UART0_get_byte_from_RX_buffer(uint8_t* ptr){
+    uint8_t index;
+    if(rx_buffer_data_count==0){
+        // buffer empty
+        return UART_NG;
+    }
+    index = rx_buffer_head_index-rx_buffer_data_count;
+    index %= UART0_BUFFER_LENGTH;
+    *ptr = UART0_RX_buffer[index];
+    rx_buffer_data_count--;
+
+    return UART_OK;
+}
+
+/* public functions */
+// put string to TX buffer
+void _UART0_interrupt_handler() __critical{
+    if(TI){
+        // dransmit done
+        TI = 0;
+        _UART0_TX_done_interrupt_handler();
+    }
+    if(RI){
+        // receive done
+        RI = 0;
+        _UART0_RX_done_interrupt_handler();
+    }
+}
+
+uint8_t UART0_get_bytes_to_read(){
+    return rx_buffer_data_count;
+}
+
+uint8_t UART0_get_bytes_from_buffer(uint8_t* array, uint8_t length){
+    uint8_t index;
+    for(index=0;index<length;index++){
+        if(UART0_get_bytes_to_read()){
+            UART0_get_byte_from_RX_buffer(&array[index]);
+        }else{
+            break;
+        }
+    }
+
+    return index;
+}
+
+uint8_t UART0_write_string_IT(char* string){
+    uint8_t index;
+    for(index=0;string[index]!='\0';index++){
+        if(UART0_put_byte_to_TX_buffer(string[index])==UART_NG){
+            // buffer full
+            break;
+        }
+    }
+    if(tx_processing==0){
+        tx_processing = 1;
+        _UART0_TX_done_interrupt_handler();
+    }
+
+    return index;   // bytes to success
+}
+
+// put array to TX buffer
+uint8_t UART0_write_array_IT(uint8_t* array, uint8_t length){
+    uint8_t index;
+    for(index=0;index<length;index++){
+        if(UART0_put_byte_to_TX_buffer(array[index])==UART_NG){
+            // buffer full
+            break;
+        }
+    }
+    if(tx_processing==0){
+        tx_processing = 1;
+        _UART0_TX_done_interrupt_handler();
+    }
+
+    return index;
+}
+#endif
