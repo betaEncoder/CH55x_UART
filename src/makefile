@@ -13,6 +13,7 @@ EXTRA_FLAGS = --opt-code-speed
 C_FILES = \
 	main.c \
 	uart.c \
+	gpio.c \
 	../ch554_sdcc/include/debug.c
 
 ifndef FREQ_SYS

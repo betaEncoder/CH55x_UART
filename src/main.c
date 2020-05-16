@@ -12,20 +12,18 @@
 #include "../ch554_sdcc/include/ch554.h"
 #include "../ch554_sdcc/include/debug.h"
 
+#include "gpio.h"
 #include "uart.h"
 
-#define LED_PIN 5
-SBIT(LED, 0x90, LED_PIN);
+#define LED_PIN GPIO_PIN5
+#define LED_PORT GPIO_PORT1
+#define LED P1_5
 
 int main(){
     CfgFsys();
     uint8_t c;
 
-//    P1_DIR_PU &= 0x0C;
-    P1_MOD_OC = P1_MOD_OC & ~(1<<LED_PIN);
-    P1_DIR_PU = P1_DIR_PU |	(1<<LED_PIN);
-    LED = 0;
-//    P1 = 0;
+    GPIO_Init(LED_PORT, LED_PIN, GPIO_MODE_PUSHPULL);
 
     UART0_init();
     UART0_interrupt_enable();
