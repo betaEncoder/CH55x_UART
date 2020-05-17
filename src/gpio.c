@@ -1,16 +1,22 @@
-/********************************** (C) COPYRIGHT *******************************
-* File Name		  : gpio.h
-* Author			 : betaEncoder
-* Version			: V1.0
-* Date			   : 2020/05/16
-* Description		: gpio driver
-*******************************************************************************/
+/**
+ * @file gpio.c
+ * @brief GPIO driver for CH55x
+ * @author betaEncoder
+ * @date 2020/05/11
+ */
 
 #include <stdint.h>
 #include "../ch554_sdcc/include/ch554.h"
 
 #include "gpio.h"
 
+/**
+ * @brief configure GPIO direction and pullup
+ * @param port port to configure
+ * @param pin pin to configure
+ * @param mode direction and pullup
+ * @return none
+ */
 void GPIO_Init(uint8_t port, uint8_t pin, uint8_t mode){
     uint8_t mask = ~(1<<pin);
     uint8_t tmp_MOD, tmp_DIR;
@@ -73,14 +79,29 @@ void GPIO_Init(uint8_t port, uint8_t pin, uint8_t mode){
     }
 }
 
+/**
+ * @brief configure interrupt mask
+ * @param event oring bits to event bit
+ * @return none
+ */
 void GPIO_set_interrupt_mask(uint8_t event){
     GPIO_IE = event;
 }
 
+/**
+ * @brief GPIO interrupt enable
+ * @param none
+ * @return none
+ */
 void GPIO_interrupt_enable(){
     IE_GPIO = 1;
 }
 
+/**
+ * @brief GPIO interrupt disable
+ * @param none
+ * @return none
+ */
 void GPIO_interrupt_disable(){
     IE_GPIO = 0;
 }

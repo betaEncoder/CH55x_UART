@@ -1,10 +1,10 @@
-/********************************** (C) COPYRIGHT *******************************
-* File Name		  : uart.c
-* Author			 : betaEncoder
-* Version			: V1.0
-* Date			   : 2020/05/11
-* Description		: uart driver
-*******************************************************************************/
+/**
+ * @file uart.h
+ * @brief UART driver for CH55x
+ * @author betaEncoder
+ * @date 2020/05/11
+ */
+
 // define for debug
 #define FREQ_SYS 24000000
 

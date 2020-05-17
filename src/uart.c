@@ -1,15 +1,20 @@
-/********************************** (C) COPYRIGHT *******************************
-* File Name		  : uart.c
-* Author			 : betaEncoder
-* Version			: V1.0
-* Date			   : 2020/05/11
-* Description		: uart driver
-*******************************************************************************/
+/**
+ * @file uart.c
+ * @brief UART driver for CH55x
+ * @author betaEncoder
+ * @date 2020/05/11
+ */
+
 #include <stdint.h>
 #include "../ch554_sdcc/include/ch554.h"
 
 #include "uart.h"
 
+/**
+ * @brief UART0 initialise function
+ * @param none
+ * @return none
+ */
 void UART0_init(){
     // setup io mode
 #ifndef UART0_ALT_PIN   // use default pin
@@ -92,36 +97,67 @@ void UART0_init(){
     return;
 }
 
+/**
+ * @brief UART0 enable interrupt function
+ * @param none
+ * @return none
+ */
 inline void UART0_interrupt_enable(){
     ES = 1;
 
     return;
 }
 
+
+/**
+ * @brief UART0 disable interrupt function
+ * @param none
+ * @return none
+ */
 inline void UART0_interrupt_disable(){
     ES = 0;
 
     return;
 }
 
+/**
+ * @brief UART0 clear EX interrupt flag function
+ * @param none
+ * @return none
+ */
 inline void UART0_clear_RX_interrupt_flag(){
     RI = 0;
 
     return;
 }
 
+/**
+ * @brief makes UART0 interrupt priority higher
+ * @param none
+ * @return none
+ */
 inline void UART0_increase_interrupt_priority(){
     PS = 1;
 
     return;
 }
 
+/**
+ * @brief makes UART0 interrupt priority lower
+ * @param none
+ * @return none
+ */
 inline void UART0_decrease_interrupt_priority(){
     PS = 0;
 
     return;
 }
 
+/**
+ * @brief wait until receive next data received and return byte
+ * @param none
+ * @return received byte
+ */
 // blocking read byte
 uint8_t UART0_read_byte(){
     while(!RI); // wait for receive
@@ -129,7 +165,11 @@ uint8_t UART0_read_byte(){
     return SBUF;
 }
 
-// blocking write byte
+/**
+ * @brief blocking write
+ * @param byte data to send
+ * @return none
+ */
 inline void UART0_write_byte(uint8_t byte){
     SBUF = byte;
     while(TI ==0);  // wait for done
@@ -138,7 +178,11 @@ inline void UART0_write_byte(uint8_t byte){
     return;
 }
 
-// blocking write string(null terminated array) 
+/**
+ * @brief UART0 blocking write string
+ * @param string pointer to string(null terminated)
+ * @return none
+ */
 void UART0_write_string(char* string){
     while(*string!='\0'){
         UART0_write_byte(*string);
@@ -157,6 +201,8 @@ uint8_t tx_buffer_head_index = 0;
 uint8_t tx_buffer_data_count = 0;
 uint8_t rx_buffer_head_index = 0;
 uint8_t rx_buffer_data_count = 0;
+
+// ring buffer
 uint8_t UART0_TX_buffer[UART0_BUFFER_LENGTH];
 uint8_t UART0_RX_buffer[UART0_BUFFER_LENGTH];
 
@@ -240,7 +286,12 @@ uint8_t UART0_get_byte_from_RX_buffer(uint8_t* ptr){
 }
 
 /* public functions */
-// put string to TX buffer
+/**
+ * @brief UART0 interrupt handler
+ * @param none
+ * @return none
+ * @detail Interrupt handler must be file which main() is written.
+ */
 void _UART0_interrupt_handler() __critical{
     if(TI){
         // dransmit done
@@ -254,10 +305,22 @@ void _UART0_interrupt_handler() __critical{
     }
 }
 
+/**
+ * @brief get number of bytes to read
+ * @param none
+ * @return available number of rx data
+ */
 uint8_t UART0_get_bytes_to_read(){
     return rx_buffer_data_count;
 }
 
+/**
+ * @brief get number of bytes from rx buffer
+ * @param array pointer to write
+ * @param length number to read
+ * @return number of written bytes
+ * @detail if enough data is not available, length and return is not same
+ */
 uint8_t UART0_get_bytes_from_buffer(uint8_t* array, uint8_t length){
     uint8_t index;
     for(index=0;index<length;index++){
@@ -271,6 +334,12 @@ uint8_t UART0_get_bytes_from_buffer(uint8_t* array, uint8_t length){
     return index;
 }
 
+/**
+ * @brief write string to TX buffer
+ * @param string pointer to string(null terminated)
+ * @return number of written bytes
+ * @detail if enough data is not available, length and return is not same
+ */
 uint8_t UART0_write_string_IT(char* string){
     uint8_t index;
     for(index=0;string[index]!='\0';index++){
@@ -287,7 +356,13 @@ uint8_t UART0_write_string_IT(char* string){
     return index;   // bytes to success
 }
 
-// put array to TX buffer
+/**
+ * @brief write array to TX buffer
+ * @param string pointer to string(null terminated)
+ * @param length number to write
+ * @return number of written bytes
+ * @detail if enough data is not available, length and return is not same
+ */
 uint8_t UART0_write_array_IT(uint8_t* array, uint8_t length){
     uint8_t index;
     for(index=0;index<length;index++){

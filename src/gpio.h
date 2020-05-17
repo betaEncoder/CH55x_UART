@@ -1,10 +1,9 @@
-/********************************** (C) COPYRIGHT *******************************
-* File Name		  : gpio.h
-* Author			 : betaEncoder
-* Version			: V1.0
-* Date			   : 2020/05/16
-* Description		: gpio driver
-*******************************************************************************/
+/**
+ * @file gpio.h
+ * @brief GPIO driver for CH55x
+ * @author betaEncoder
+ * @date 2020/05/11
+ */
 
 #define GPIO_PORT1 1
 #define GPIO_PORT3 3

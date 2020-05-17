@@ -1,10 +1,10 @@
-/********************************** (C) COPYRIGHT *******************************
-* File Name		  : main.c
-* Author			 : betaEncoder
-* Version			: V1.0
-* Date			   : 2020/05/11
-* Description		: uart sample
-*******************************************************************************/
+/**
+ * @file main.c
+ * @brief example for uart driver
+ * @author betaEncoder
+ * @date 2020/05/11
+ */
+
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -47,6 +47,7 @@ int main(){
     return 0;
 }
 
-void UART0_TX_done_isr(void) __interrupt INT_NO_UART0{
+// uart0 interrupt function
+void UART0_isr(void) __interrupt INT_NO_UART0 {
     _UART0_interrupt_handler();
 }
