@@ -14,6 +14,7 @@
 
 #include "gpio.h"
 #include "uart.h"
+#include "adc.h"
 
 #define LED_PIN GPIO_PIN5
 #define LED_PORT GPIO_PORT1
@@ -21,9 +22,12 @@
 
 int main(){
     CfgFsys();
-    uint8_t c;
+    uint8_t c, str[8];
 
     GPIO_Init(LED_PORT, LED_PIN, GPIO_MODE_PUSHPULL);
+    ADC_enable(ADC_SPEED_HIGH);
+    ADC_CMP_select_input(ADC_AIN0);
+    ADC_start();
 
     UART0_init();
     UART0_interrupt_enable();
@@ -37,6 +41,12 @@ int main(){
             UART0_get_bytes_from_buffer(&c, 1);
             if(c=='1'){
                 LED = 1;
+            }else if(c=='a'){
+                c = ADC_get_value();
+                ADC_start();
+                sprintf(str, "%d\r\n", c);
+                UART0_write_string_IT(str);
+                continue;
             }else{
                 LED = 0;
             }
