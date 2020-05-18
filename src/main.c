@@ -16,6 +16,7 @@
 #include "uart.h"
 #include "adc.h"
 #include "pwm.h"
+#include "eeprom.h"
 
 #define LED_PIN GPIO_PIN5
 #define LED_PORT GPIO_PORT1
@@ -53,6 +54,18 @@ int main(){
             if(c=='a'){
                 sprintf(str, "ADC=%d\r\n", ad);
                 UART0_write_string_IT(str);
+                continue;
+            }else if(c=='r'){
+                UART0_write_string("EEPROM Read:\r\n");
+                if(EEPROM_read(str, 16)==EEPROM_OK){
+                    UART0_write_string(str);
+                }
+                continue;
+            }else if(c=='w'){
+                UART0_write_string("EEPROM Write:\r\n");
+                if(EEPROM_write("hogehoge", sizeof("hogehoge"))==EEPROM_OK){
+                    UART0_write_string("done.");
+                }
                 continue;
             }
             // echo back

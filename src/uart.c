@@ -159,7 +159,7 @@ inline void UART0_decrease_interrupt_priority(){
  * @return received byte
  */
 // blocking read byte
-uint8_t UART0_read_byte(){
+uint8_t UART0_read_byte() __critical{
     while(!RI); // wait for receive
     RI = 0;
     return SBUF;
@@ -170,7 +170,7 @@ uint8_t UART0_read_byte(){
  * @param byte data to send
  * @return none
  */
-inline void UART0_write_byte(uint8_t byte){
+inline void UART0_write_byte(uint8_t byte) __critical{
     SBUF = byte;
     while(TI ==0);  // wait for done
     TI = 0;
