@@ -22,10 +22,11 @@
 
 int main(){
     CfgFsys();
-    uint8_t c, str[8];
+    uint8_t c;
+    __xdata uint8_t str[16];
 
     GPIO_Init(LED_PORT, LED_PIN, GPIO_MODE_PUSHPULL);
-    ADC_enable(ADC_SPEED_HIGH);
+    ADC_enable(ADC_SPEED_LOW);
     ADC_CMP_select_input(ADC_AIN0);
     ADC_start();
 
